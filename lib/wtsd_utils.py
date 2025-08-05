@@ -41,7 +41,7 @@ def get_idx_labels(embeds, edges, labels, label_id):
     idx = []
     for i, j in label_idx:
         idx.append(tsne_utils.get_idx_box(embeds, edges, i, j))
-    return [i for idx_list in idx for i in idx_list]
+    return np.unique(np.ravel([[i, i+1] for idx_list in idx for i in idx_list if i < len(embeds)-1]))
 
 def save_label_frames(embeds, edges, labels, label_id, subj_id):
     idx = get_idx_labels(embeds, edges, labels, label_id)

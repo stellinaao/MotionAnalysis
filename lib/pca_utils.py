@@ -57,6 +57,27 @@ def plot_cum_var(evrs, thresh, n_pcs, n_rows=None, n_cols=None, title=None, subt
     fig.tight_layout()
     plt.show()
 
+def plot_pca_loadings(pca_loadings, pc_a=0, pc_b=1, labels=None,  n_rows=None, n_cols=None, title=None, subtitle=None):
+    if n_rows == None or n_cols == None:
+        raise Exception("ERROR: no value for n_rows and n_cols specified!")
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols*constants.SUBPLOT_SQUARE_SIDELEN, n_rows*constants.SUBPLOT_SQUARE_SIDELEN))
+    for i, ax in enumerate(axes.flat):
+        ax.scatter(pca_loadings[i][:, pc_a], pca_loadings[i][:, pc_b], s=1, alpha=0.5)
+        ax.set_xlabel(f"PC {pc_a+1}"); ax.set_ylabel(f"PC {pc_b+1}")
+        ax.set_title(f"{data.subject_ids[i]}")
+    
+        for j, txt in enumerate(labels):
+            ax.annotate(txt, (pca_loadings[i][j, pc_a], pca_loadings[i][j, pc_b]))
+
+    if title==None: 
+        title = "Loadings"
+        if not subtitle == None:
+            title += f" - {subtitle}"
+    fig.suptitle(title)
+
+    fig.tight_layout()
+    plt.show()
+
 def plot_pca(dlc_reduxs, pc_a=0, pc_b=1,  n_rows=None, n_cols=None, title=None, subtitle=None):
     if n_rows == None or n_cols == None:
         raise Exception("ERROR: no value for n_rows and n_cols specified!")

@@ -111,6 +111,29 @@ def get_norm_dict(dlc_outputs):
 
         norm_dict.update({f"{x}_mean": part_x_mean, f"{x}_std": part_x_std, f"{y}_mean": part_y_mean, f"{y}_std": part_y_std})
 
+def ohe(dlc_coords, n_boxes):
+    return [ohe_subj(np.array(coords), n_boxes) for coords in dlc_coords]
+
+def ohe_subj(coords, n_boxes):
+    if not(np.shape(coords)[1] == n_bodyparts*2): raise ValueError(f"ERROR: check coords shape; the number of features ({np.shape(coords)[1]}) is not equal to n_bodyparts * 2 ({n_bodyparts * 2})")
+    n_pixels = (np.floor(np.max(coords))+1).astype(int)
+    return np.array([ohe_t(coords_t, n_boxes, n_pixels) for coords_t in coords])
+
+def ohe_t(coords_t, n_boxes, n_pixels):
+    fvec_t = np.zeros((int(n_boxes**2 * n_bodyparts),))
+
+    for i in range(2):
+        grid = ohe_bp(coords_t[i*2:(i+1)*2], n_boxes, n_pixels) 
+        fvec_t[n_boxes**2*i:n_boxes**2*(i+1)] = np.ravel(grid)
+    return fvec_t
+
+def ohe_bp(coord_bp, n_boxes, n_pixels):
+    n_px_per_box = np.ceil(n_pixels/n_boxes)
+    grid = np.zeros((n_boxes, n_boxes))
+    grid[(coord_bp[0]//n_px_per_box).astype(int), (coord_bp[1]//n_px_per_box).astype(int)] += 1
+
+    return grid
+
 def get_fname_csv(subj_id, sess_id):
     return f"{subj_id}_DynamicForaging_{sess_id}_cam0_00000000DLC_resnet50_MR15Jul8shuffle1_300000.csv"
 

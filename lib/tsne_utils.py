@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 from scipy.ndimage import gaussian_filter
 
-from lib import data, constants
+from lib import data, constants, vid_utils
 
 def plot_density_all(tsne_embeds, n_box=100):
     fig, axes = plt.subplots(nrows=data.n_subj, ncols=3, figsize=(3*constants.SUBPLOT_SQUARE_SIDELEN, data.n_subj*constants.SUBPLOT_SQUARE_SIDELEN))
@@ -69,6 +69,13 @@ def plot_density_3d(tsne_embed, n_box=100, axes=None, doShow=False):
 
     return fig, axes
 
+def get_idx_cluster(cluster_ids, cluster_id):
+    return np.where(cluster_ids == cluster_id)[0]
+
+def save_cluster_frames(cluster_ids, cluster_id, subj_id):
+    idx = get_idx_cluster(cluster_ids, cluster_id)
+    vid_utils.save_vidclip_frames(data.subject_ids[subj_id], data.session_ids[subj_id], frames=idx, tag=f"{data.subject_ids[subj_id]}-cluster{cluster_id}")
+
 def get_idx_box(embeds, edges, i, j):
     x_range = (edges[i], edges[i+1])
     y_range = (edges[j], edges[j+1])
@@ -95,4 +102,15 @@ def plot_embed_power(embed, cwtmatr_fvec, title=None, subtitle=None):
     fig = px.scatter(x=embed[:,0], y=embed[:,1], color=np.log([np.sum(vec) for vec in cwtmatr_fvec]), title=title)
     fig.update_traces(marker=dict(size=1))
     fig.update_layout(coloraxis_colorbar=dict(title="power"), width=constants.SUBPLOT_SQUARE_SIDELEN*200, height=constants.SUBPLOT_SQUARE_SIDELEN*200)
+    fig.show()
+
+def plot_embed_custom(embed, color, cbar_title="", title=None, subtitle=None):
+    if title==None: 
+        title = "TSNE Embedding Space"
+        if not subtitle == None:
+            title += f" - {subtitle}"
+            
+    fig = px.scatter(x=embed[:,0], y=embed[:,1], color=color, title=title)
+    fig.update_traces(marker=dict(size=1))
+    fig.update_layout(coloraxis_colorbar=dict(title=cbar_title), width=constants.SUBPLOT_SQUARE_SIDELEN*200, height=constants.SUBPLOT_SQUARE_SIDELEN*200)
     fig.show()
